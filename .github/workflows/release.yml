@@ -1,0 +1,98 @@
+name: Versioning
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:${{ vars.GODOT_VERSION }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: "Windows Desktop"
+            file: "Mechanica.exe"
+            zip: "Mechanica-windows"
+          - preset: "Linux"
+            file: "Mechanica.x86_64"
+            zip: "Mechanica-linux"
+    env:
+      GAME_DIR: game
+    steps:
+      - name: Checkout tagged commit
+        uses: actions/checkout@v6
+
+      - name: Check that the export preset exists
+        run: |
+          if ! grep -q 'name="${{ matrix.preset }}"' "$GAME_DIR/export_presets.cfg"; then
+            echo "::error::Export-Preset '${{ matrix.preset }}' nicht in $GAME_DIR/export_presets.cfg gefunden."
+            exit 1
+          fi
+
+      - name: Set up Godot export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          cp -rn /root/.local/share/godot/export_templates/. ~/.local/share/godot/export_templates/ || true
+
+      - name: Export
+        run: |
+          mkdir -p "build/${{ matrix.zip }}"
+          cd "$GAME_DIR"
+          godot --headless --import || true
+          godot --headless --export-release "${{ matrix.preset }}" "$GITHUB_WORKSPACE/build/${{ matrix.zip }}/${{ matrix.file }}"
+
+      - name: Zip build
+        run: |
+          cd build
+          apt-get update -qq && apt-get install -y -qq zip >/dev/null 2>&1 || true
+          zip -r "${{ matrix.zip }}.zip" "${{ matrix.zip }}"
+          ls -lh "${{ matrix.zip }}.zip"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.zip }}
+          path: build/${{ matrix.zip }}.zip
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tagged commit
+        uses: actions/checkout@v6
+
+      - name: Download all builds
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Collect extra files from downloads/
+        run: |
+          # Alles, was in downloads/ liegt (außer .gitkeep und der Beispieldatei), wird ebenfalls ans Release gehängt.
+          if [ -d downloads ]; then
+            find downloads -maxdepth 1 -type f ! -name '.gitkeep' ! -name 'beispiel.txt' -exec cp {} dist/ \;
+          fi
+          ls -lh dist
+
+      - name: Create release or update its assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" dist/* --repo "$REPOSITORY" --clobber
+          else
+            gh release create "$RELEASE_TAG" dist/* \
+              --repo "$REPOSITORY" \
+              --title "Version $RELEASE_TAG" \
+              --generate-notes
+          fi

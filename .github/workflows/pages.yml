@@ -1,0 +1,72 @@
+name: Deploy Game
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:${{ vars.GODOT_VERSION}}
+    env:
+      GAME_DIR: game
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Prepare website
+        run: |
+          mkdir -p _site
+          cp index.html _site/index.html
+          cp -R assets _site/assets
+          touch _site/.nojekyll
+
+      - name: Check for Web export preset
+        id: preset
+        run: |
+          if [ -f "$GAME_DIR/export_presets.cfg" ] && grep -q 'name="Web"' "$GAME_DIR/export_presets.cfg"; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Kein Export-Preset 'Web' gefunden - es wird nur das Portal veröffentlicht."
+          fi
+
+      - name: Set up Godot export templates
+        if: steps.preset.outputs.found == 'true'
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          cp -rn /root/.local/share/godot/export_templates/. ~/.local/share/godot/export_templates/ || true
+
+      - name: Export Web build
+        if: steps.preset.outputs.found == 'true'
+        run: |
+          mkdir -p _site/play
+          cd "$GAME_DIR"
+          godot --headless --import || true
+          godot --headless --export-release "Web" "$GITHUB_WORKSPACE/_site/play/index.html"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

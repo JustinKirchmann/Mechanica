@@ -4,9 +4,8 @@ game/.mono/
 
 build/
 export/
-*.exe
-*.pck
-*.zip
+/game/build/
+game/export/
 
 .DS_Store
 Thumbs.db
