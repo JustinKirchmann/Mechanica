@@ -1,0 +1,12 @@
+game/.godot/
+game/.mono/
+*.translation
+
+build/
+export/
+*.exe
+*.pck
+*.zip
+
+.DS_Store
+Thumbs.db
