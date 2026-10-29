@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <meta name="description" content="Versionierte Downloads mit transparentem Release-Verlauf.">
+  <title>Download Portal</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/config.js"></script>
+  <script src="assets/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Startseite">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span id="brand-name">Download Portal</span>
+    </a>
+    <a class="top-link" id="repository-link" href="https://github.com" target="_blank" rel="noreferrer">
+      <span class="github-dot" aria-hidden="true">↗</span> Repository <span aria-hidden="true">↗</span>
+    </a>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="status-dot"></span> DOWNLOADS · VERSIONIERT</div>
+        <h1 id="page-title">Die richtige Datei.<br><span>Die richtige Version.</span></h1>
+        <p id="page-description" class="hero-description">Hier findest du den aktuellen Download und frühere Versionen an einem Ort.</p>
+        <div class="hero-meta">
+          <span class="meta-icon" aria-hidden="true">↳</span>
+          <span>Versionshistorie bleibt verfügbar</span>
+          <span class="meta-separator" aria-hidden="true">·</span>
+          <span>Veröffentlicht über GitHub Releases</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orb orb-back"></div>
+        <div class="file-card file-card-back"><span class="file-line short"></span><span class="file-line"></span><span class="file-line medium"></span></div>
+        <div class="file-card file-card-front">
+          <div class="file-icon"><span></span><span></span><span></span><span></span></div>
+          <div class="file-card-caption">RELEASE PACKAGE</div>
+          <div class="file-card-version">v<span id="art-version">—</span></div>
+          <div class="file-card-bar"><span></span></div>
+        </div>
+        <div class="floating-tag">✓ geprüft eingecheckt</div>
+      </div>
+    </section>
+
+    <section class="download-section" aria-labelledby="download-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">JETZT VERFÜGBAR</p>
+          <h2 id="download-title">Aktuelle Version</h2>
+        </div>
+        <span class="live-pill"><span class="status-dot"></span> Live von GitHub</span>
+      </div>
+      <article class="release-card" id="latest-card">
+        <div class="release-file-icon" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <div class="release-details">
+          <div class="release-title-line"><h3 id="latest-name">Download wird geladen …</h3><span class="version-pill" id="latest-version">—</span></div>
+          <p id="latest-description" class="release-subtitle">Die Release-Informationen werden von GitHub abgerufen.</p>
+          <div class="release-facts"><span id="latest-date">Datum wird geladen</span><span class="fact-dot">·</span><span id="latest-size">Dateigröße —</span></div>
+        </div>
+        <a class="primary-button" id="latest-download" href="#versions" aria-disabled="true">
+          <span>Download</span><span class="download-arrow" aria-hidden="true">↓</span>
+        </a>
+      </article>
+      <p class="inline-status" id="status-message" role="status" aria-live="polite">Verbindung zu GitHub wird hergestellt …</p>
+    </section>
+
+    <section class="versions-section" id="versions" aria-labelledby="versions-title">
+      <div class="section-heading versions-heading">
+        <div>
+          <p class="section-kicker">ARCHIV</p>
+          <h2 id="versions-title">Frühere Versionen</h2>
+        </div>
+        <span class="history-count" id="history-count">0 Versionen</span>
+      </div>
+      <div class="version-list" id="version-list">
+        <div class="empty-state"><span class="empty-symbol">↻</span><p>Versionshistorie wird geladen …</p></div>
+      </div>
+      <p class="archive-note"><span class="note-mark">i</span> Jede veröffentlichte Version bleibt über ihren eigenen Release-Link erreichbar.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-brand"><span class="brand-mark small" aria-hidden="true"><span></span><span></span><span></span></span><span id="footer-name">Download Portal</span></div>
+    <p>Einfach laden. Klar versioniert.</p>
+    <a id="footer-releases" href="https://github.com" target="_blank" rel="noreferrer">Alle Releases auf GitHub ↗</a>
+  </footer>
+</body>
+</html>
